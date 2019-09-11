@@ -4,3 +4,4 @@ notebooks/.ipynb_checkpoints
 .bash_history
 .ipython
 .local
+.jupyter

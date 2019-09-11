@@ -10,4 +10,4 @@ docker run -it -d -p 8888:8888 --name jupyter-environment \
   --volume="/etc/passwd:/etc/passwd:ro" \
   --volume="/etc/shadow:/etc/shadow:ro" \
   --volume="/etc/sudoers.d:/etc/sudoers.d:ro" \
-  jupyter:v2
+  andreweiner/jupyter-environment:92a151c
