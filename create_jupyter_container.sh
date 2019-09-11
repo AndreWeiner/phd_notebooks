@@ -9,4 +9,4 @@ docker run -it -d -p 8888:8888 --name jupyter-environment \
   --volume="$DATA_LOCAL:$DATA_CONTAINER" \
   --volume="$NOTEBOOKS_LOCAL:$NOTEBOOKS_CONTAINER" \
   --volume="$OUTPUT_LOCAL:$OUTPUT_CONTAINER" \
-  andreweiner/jupyter-environment:v1
+  andreweiner/jupyter-environment:25778ec
