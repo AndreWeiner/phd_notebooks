@@ -1,12 +1,13 @@
-DATA_LOCAL="${PWD}/data/"
-NOTEBOOKS_LOCAL="${PWD}/notebooks/"
-OUTPUT_LOCAL="${PWD}/output/"
-DATA_CONTAINER="/home/jupyter_user/data/"
-NOTEBOOKS_CONTAINER="/home/jupyter_user/notebooks/"
-OUTPUT_CONTAINER="/home/jupyter_user/output/"
+username="$USER"
+user="$(id -u)"
 
 docker run -it -d -p 8888:8888 --name jupyter-environment \
-  --volume="$DATA_LOCAL:$DATA_CONTAINER" \
-  --volume="$NOTEBOOKS_LOCAL:$NOTEBOOKS_CONTAINER" \
-  --volume="$OUTPUT_LOCAL:$OUTPUT_CONTAINER" \
-  andreweiner/jupyter-environment:25778ec
+  --user=${user} \
+  -e USER=${username} \
+  --workdir="$HOME" \
+  --volume="$(pwd):$HOME" \
+  --volume="/etc/group:/etc/group:ro" \
+  --volume="/etc/passwd:/etc/passwd:ro" \
+  --volume="/etc/shadow:/etc/shadow:ro" \
+  --volume="/etc/sudoers.d:/etc/sudoers.d:ro" \
+  jupyter:v2

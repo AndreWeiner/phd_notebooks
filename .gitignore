@@ -1,3 +1,6 @@
 data
 output
 notebooks/.ipynb_checkpoints
+.bash_history
+.ipython
+.local

@@ -23,12 +23,3 @@ RUN pip3 install \
 
 # expose port to run in browser
 EXPOSE 8888
-
-# create a user and add notebook, data, and output endpoints
-ARG JNB_USER="jupyter_user"
-RUN useradd --user-group --create-home --shell /bin/bash $JNB_USER  && \
-  echo "$JNB_USER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-USER $JNB_USER
-WORKDIR "/home/$JNB_USER"
-RUN mkdir notebooks data output && \
-  echo "jupyter notebook --ip=0.0.0.0 notebooks" > start_notebook.sh
