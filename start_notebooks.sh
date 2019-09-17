@@ -1,3 +1,4 @@
-CONTAINER_NAME="jupyter-environment"
-docker start $CONTAINER_NAME
-docker exec -it $CONTAINER_NAME /bin/bash notebooks/start.sh
+default_container_name="jupyter-environment"
+container_name="${1:-$default_container_name}"
+docker start $container_name
+docker exec -it $container_name /bin/bash notebooks/start.sh

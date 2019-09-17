@@ -7,12 +7,15 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # install pip (python 3)
 RUN apt-get update && apt-get install -y  \
+  dvipng \
   python3-matplotlib \
   python3-numpy \
   python3-pandas \
   python3-pip \
   python3-scipy \
-  python3-tqdm && \
+  python3-tqdm \
+  texlive-latex-extra \
+  texlive-fonts-recommended && \
   rm -rf /var/lib/apt/lists/*
 
 # update pip and install scikit learn and pytorch
