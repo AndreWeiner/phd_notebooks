@@ -8,9 +8,18 @@ Cotains the following data structures:
 import pandas as pd
 import numpy as np
 
+# parameters for uniform plot appearance
+alpha_contour = 0.75
+fontsize_contour = 14
+fontsize_label = 24
+fontsize_legend = 20
+fontsize_tick = 20
+figure_width = 16
+line_width = 3
+
 
 class Logfile():
-    def __init__(self, path=None, ga=None):
+    def __init__(self, path=None):
         """Initialize a Logfile object.
 
         Parameters
@@ -19,20 +28,17 @@ class Logfile():
 
         """
         self.path = path
-        self.read_logfile()
 
-    def read_logfile(self, names=None, usecols=None):
+    def read_logfile(self, usecols=None):
         """Read log-file from source.abs
 
         Parameters
         ----------
-        names - List   : list containing the column names as String
         usecols - List : list of columns to use as String
 
         """
         try:
-            self.log = pd.read_csv(self.path, sep=',', header=None,
-                                   names=names, usecols=usecols)
+            self.log = pd.read_csv(self.path, sep=',', usecols=usecols)
             print("Successfully read file \033[1m{}\033[0m".format(self.path))
         except Exception as general_exception:
             print("Error reading file \033[1m{}\033[0m".format(self.path))
@@ -112,4 +118,4 @@ class Logfile():
 
         """
         row = self.log.iloc[(self.log[value_name] - value).abs().argsort()[:1]]
-        return row.values
+        return row
