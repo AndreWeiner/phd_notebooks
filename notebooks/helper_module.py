@@ -26,6 +26,23 @@ torch.manual_seed(42)
 np.random.seed(42)
 
 
+def transform_cartesian_2D(radius, phi):
+    """Transform 2D polar to Cartesian coordinates.
+
+    Parameters
+    ----------
+    radius, phi - array-like : polar coordinates of points to transform
+
+    Returns
+    -------
+    px, py - array-like : corresponding polar coordinates
+
+    """
+    px = np.sin(phi) * radius
+    py = np.cos(phi) * radius
+    return px, py
+
+
 def transform_polar_2D(px, py):
     """Transform 2D Cartesian to polar coordinates.
 
@@ -41,6 +58,48 @@ def transform_polar_2D(px, py):
     rad = np.sqrt(np.square(px) + np.square(py))
     phi = np.arccos(py / rad)
     return rad, phi
+
+
+def triangles_to_stl(path, region, triangles):
+    """Write list of triangles as STL file.
+
+    Parameters
+    ----------
+    path - String : path and file name to store STL file
+    region - String : STL region name
+    triangles - array-like : list of Triangle objects
+
+    """
+    stl_file = open(path, 'w')
+    stl_file.write("solid " + region + '\n')
+    for triangle in triangles:
+        stl_file.write("facet normal " + triangle.normal_to_string() + "\n")
+        stl_file.write("    outer loop\n")
+        prefix = ' ' * 8 + "vertex "
+        stl_file.write(triangle.points_to_string(prefix) + "\n")
+        stl_file.write("    endloop\n")
+        stl_file.write("endfacet\n")
+    stl_file.write("endsolid " + region)
+    stl_file.close()
+
+
+def vector_to_string(vector, sep):
+    """Convert 1D vector to String.
+
+    Parameters
+    ----------
+    vector - array-like : vector to convert
+    sep - String : String to use as separator between elements
+
+    Returns
+    -------
+    strVector - String : vector as String with elements separated by sep
+
+    """
+    strVector = ""
+    for el in vector[:-1]:
+        strVector += str(el) + sep
+    return strVector + str(vector[-1])
 
 
 class Logfile():
@@ -373,3 +432,41 @@ class SimpleMLP(torch.nn.Module):
     def model_parameters(self):
         """Compute total number of trainable model parameters."""
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
+
+
+class Triangle():
+    """Helper class to write STL files.
+    """
+    def __init__(self, p1, p2, p3):
+        """Create a Triangle object based on three points.
+
+        Parameters
+        ----------
+        p1, p2, p3 - array-like : triangle vertices of length 2 - (x, y)
+
+        """
+        self.p1 = p1
+        self.p2 = p2
+        self.p3 = p3
+
+    def points_to_string(self, prefix):
+        """Return points as String.
+
+        Parameters
+        ----------
+        prefix - String : prefix to add before each point
+
+        Returns
+        -------
+        points as String
+        """
+        p1str = prefix + vector_to_string(self.p1, " ")
+        p2str = prefix + vector_to_string(self.p2, " ")
+        p3str = prefix + vector_to_string(self.p3, " ")
+        return p1str + "\n" + p2str + "\n" + p3str
+
+    def normal_to_string(self):
+        """Compute vector normal to triangle with unit length."""
+        normal = np.cross(self.p3-self.p1, self.p2-self.p1)
+        normal = normal / np.linalg.norm(normal)
+        return vector_to_string(normal, " ")
