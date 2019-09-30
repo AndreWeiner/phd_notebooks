@@ -404,7 +404,7 @@ class SimpleMLP(torch.nn.Module):
                     self.layers.append(torch.nn.Linear(self.n_neurons, self.n_neurons))
         # last hidden layer to output layer
         self.layers.append(torch.nn.Linear(self.n_neurons, self.n_outputs))
-        print("Created model with {} weights.".format(self.model_parameters()))
+        # print("Created model with {} weights.".format(self.model_parameters()))
 
     def forward(self, x):
         """Compute forward pass through model.
