@@ -305,8 +305,6 @@ class FacetCollection2D():
         facets - array-like : [N_facets*2, 2] array with x and y coordinates
             of intersection points (facet intersection with background mesh);
             two consective elements form a facet, e.g. [:2,:] is the first facet
-        facet_centers - array-like : [N_facets, 2] array with x and y
-            coordinates of facet centers
         facet_normals - array-like : [N_facets, 2] array with nx and ny
             components (unit length)
         facet_tangentials - array-like : [N_facets, 2] array with tx and ty
@@ -317,7 +315,6 @@ class FacetCollection2D():
         self.origin = origin
         self.flip_xy = flip_xy
         self.facets = None
-        self.facet_centers = None
         self.facet_normals = None
         self.facet_tangentials = None
         self.read_facets()
@@ -354,6 +351,73 @@ class FacetCollection2D():
             return transform_polar_2D(px, py)
         else:
             return px, py
+
+    def get_facet_centers(self, polar=False):
+        """Compute centers of PLIC facets.
+
+        Parameters
+        ----------
+        polar - Boolean : return centers as polar coordinates if True
+
+        Returns
+        -------
+        centers - array-like : centers of all PLIC elements
+
+        """
+        e_x = self.facets.px.values
+        e_y = self.facets.py.values
+        c_x = np.asarray([0.5 * (e_x[e] + e_x[e+1]) for e in range(0, e_x.shape[0], 2)])
+        c_y = np.asarray([0.5 * (e_y[e] + e_y[e+1]) for e in range(0, e_y.shape[0], 2)])
+        if polar:
+            return transform_polar_2D(c_x, c_y)
+        else:
+            return c_x, c_y
+
+    def compute_unit_normals_(self):
+        """Compute the unit normal vector pointing from gas to liquid phase.
+        """
+        pass
+
+    def get_unit_normals(self):
+        """Get method for PLIC unit normal vector.
+        """
+        if self.facet_normals is None: self.compute_unit_normals_()
+        return None
+
+    def get_unit_tangentials(self):
+        """Compute and return PLIC unit tangential vector.
+        """
+        return None
+
+    def project_normal(self, field, vector=False):
+        """Project vector onto the interface normal vector.
+
+        Parameters
+        ----------
+        field - array-like : array of vectors to project
+        vector - Boolean : return scalar projection if False
+
+        Returns
+        -------
+        normal part of vector field as scalar or vector
+
+        """
+        return None
+
+    def project_tangential(self, field, vector=False):
+        """Project vector onto the interface tangential vector.
+
+        Parameters
+        ----------
+        field - array-like : array of vectors to project
+        vector - Boolean : return scalar projection if False
+
+        Returns
+        -------
+        tangtial part of vector field as scalar or vector
+
+        """
+        return None
 
 
 class SimpleMLP(torch.nn.Module):
