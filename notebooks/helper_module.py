@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.tri as tri
 import pickle
 import torch
+from tqdm import tqdm
 
 # parameters for uniform plot appearance
 alpha_contour = 0.75
@@ -24,6 +25,52 @@ line_width = 3
 torch.set_default_tensor_type(torch.DoubleTensor)
 torch.manual_seed(42)
 np.random.seed(42)
+
+
+def training_loop(model, path, x_train, y_train, y_weight, epochs, l_rate):
+    """Optimize the weights of a given MLP.
+
+    Parameters
+    ----------
+    model - SimpleMLP : model to optimize
+    path - String : path to save best model weights
+    x_train - array-like : feature vector of dimension [n_samples, n_features]
+    y_train - array-like : label vector of dimension [n_samples, n_labels]
+    y_weight - array-like : vector to put more weight on specific points in the training set; dimension [n_samples]
+    epochs - Integer : number of epochs to train
+    l_rate - Float : learning rate
+
+    Returns
+    -------
+    history - List : loss developments over epochs
+    model - SimpleMLP : opimized model in evaluation mode
+
+    """
+    if y_weight is None: y_weight = np.ones(x_train.shape[0])
+    x_tensor = torch.from_numpy(x_train.astype(np.float64)).unsqueeze_(-1)
+    y_tensor = torch.from_numpy(y_train.astype(np.float64))
+    y_weight_tensor = torch.from_numpy(y_weight.astype(np.float64))
+    zero = torch.zeros(y_tensor.shape[0])
+
+    criterion = torch.nn.MSELoss()
+    optimizer = torch.optim.Adam(params=model.parameters(), lr=l_rate)
+
+    best_loss = 1.0E5
+    train_loss = []
+
+    for e in tqdm(range(1, epochs+1)):
+        optimizer.zero_grad()
+        output = model.forward(x_tensor)
+        diff = (output.squeeze(dim=1) - y_tensor) * y_weight_tensor
+        loss = criterion(diff, zero)
+        train_loss.append(loss.item())
+        loss.backward()
+        optimizer.step()
+
+        if loss.item() < best_loss:
+            best_loss = loss.item()
+            torch.save(model.state_dict(), path)
+    return model.eval(), np.asarray(train_loss)
 
 
 def transform_cartesian_2D(radius, phi):
@@ -291,7 +338,7 @@ class CenterFieldValues2D():
 class FacetCollection2D():
     """Read and evaluate geometrical properties of PLIC facets."""
 
-    def __init__(self, path, origin, flip_xy):
+    def __init__(self, path, origin, flip_xy, field_2D=None):
         """Initialize FacetCollection2D object.
 
         Parameters
@@ -299,6 +346,7 @@ class FacetCollection2D():
         path - String : path to facet data
         origin - array-like : [x, y] coordinates of the origin
         flip_xy - Boolean : flip x and y coordinate if True
+        field_2D - CenterFieldValues2D : simulation data underlying the facets
 
         Members
         -------
@@ -314,6 +362,7 @@ class FacetCollection2D():
         self.path = path
         self.origin = origin
         self.flip_xy = flip_xy
+        self.field_2D = field_2D
         self.facets = None
         self.facet_normals = None
         self.facet_tangentials = None
@@ -364,8 +413,7 @@ class FacetCollection2D():
         centers - array-like : centers of all PLIC elements
 
         """
-        e_x = self.facets.px.values
-        e_y = self.facets.py.values
+        e_x, e_y = self.get_facets()
         c_x = np.asarray([0.5 * (e_x[e] + e_x[e+1]) for e in range(0, e_x.shape[0], 2)])
         c_y = np.asarray([0.5 * (e_y[e] + e_y[e+1]) for e in range(0, e_y.shape[0], 2)])
         if polar:
@@ -373,28 +421,40 @@ class FacetCollection2D():
         else:
             return c_x, c_y
 
-    def compute_unit_normals_(self):
-        """Compute the unit normal vector pointing from gas to liquid phase.
-        """
-        pass
-
     def get_unit_normals(self):
-        """Get method for PLIC unit normal vector.
+        """Compute the unit normal vector pointing from gas to liquid phase.
+
+        Parameters
+        ----------
+        orientation - array-like :
         """
-        if self.facet_normals is None: self.compute_unit_normals_()
-        return None
+        if self.facet_normals is None:
+            e_x, e_y = self.get_facets()
+            t_x = np.asarray([e_x[e+1] - e_x[e] for e in range(0, e_x.shape[0], 2)])
+            t_y = np.asarray([e_y[e+1] - e_y[e] for e in range(0, e_y.shape[0], 2)])
+            t_vec = np.asarray([t_x, t_y, np.zeros(t_x.shape[0])])
+            n_vec = np.cross(t_vec.T, np.asarray([0, 0, 1]))
+            c_x, c_y = self.get_facet_centers()
+            c_vec = np.asarray([c_x, c_y, np.zeros(c_x.shape[0])])
+            ref_p = c_vec.T + n_vec
+            ref_m = c_vec.T - n_vec
+            grad_f = (self.field_2D.interpolate_volume_fraction(ref_p[:, 0], ref_p[:, 1])
+                   -  self.field_2D.interpolate_volume_fraction(ref_m[:, 0], ref_m[:, 1]))
+            n_vec = n_vec.T * np.sign(grad_f) / np.linalg.norm(n_vec, axis=1)
+            self.facet_normals = n_vec.T
+        return self.facet_normals
 
     def get_unit_tangentials(self):
         """Compute and return PLIC unit tangential vector.
         """
-        return None
+        t_vec = np.cross(self.get_unit_normals(), np.asarray([0, 0, 1]))
+        return np.transpose(t_vec.T / np.linalg.norm(t_vec, axis=1))
 
-    def project_normal(self, field, vector=False):
+    def project_normal(self, vector=False):
         """Project vector onto the interface normal vector.
 
         Parameters
         ----------
-        field - array-like : array of vectors to project
         vector - Boolean : return scalar projection if False
 
         Returns
@@ -402,14 +462,20 @@ class FacetCollection2D():
         normal part of vector field as scalar or vector
 
         """
-        return None
+        c_x, c_y = self.get_facet_centers()
+        u_x, u_y = self.field_2D.interpolate_velocity(c_x, c_y, relative=True, magnitude=False)
+        u_n = np.sum(np.multiply(np.asarray([u_x, u_y]).T, self.facet_normals[:, :2]), axis=1)
+        if vector:
+            return self.facet_normals[:, :2].T * u_n
+        else:
+            return u_n
 
-    def project_tangential(self, field, vector=False):
+
+    def project_tangential(self, vector=False):
         """Project vector onto the interface tangential vector.
 
         Parameters
         ----------
-        field - array-like : array of vectors to project
         vector - Boolean : return scalar projection if False
 
         Returns
@@ -417,7 +483,14 @@ class FacetCollection2D():
         tangtial part of vector field as scalar or vector
 
         """
-        return None
+        c_x, c_y = self.get_facet_centers()
+        u_x, u_y = self.field_2D.interpolate_velocity(c_x, c_y, relative=True, magnitude=False)
+        t_vec = self.get_unit_tangentials()[:, :2]
+        u_t = np.sum(np.multiply(np.asarray([u_x, u_y]).T, t_vec), axis=1)
+        if vector:
+            return t_vec.T * u_t
+        else:
+            return u_t
 
 
 class SimpleMLP(torch.nn.Module):
