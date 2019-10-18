@@ -255,7 +255,7 @@ class Logfile():
 
 
 class CenterFieldValues2D():
-    def __init__(self, path=None, center=None, u_b=None):
+    def __init__(self, path=None, center=None, u_b=None, of=False):
         """Initialize CenterFieldValue2D object.
 
         Parameters
@@ -263,19 +263,26 @@ class CenterFieldValues2D():
         path - String : path to data file
         center - array-like : [x,y] coordinates of the center of mass
         U_b - array-like : [u_x, u_y] components of the bubble rise velocity
+        of - Boolean : True if field comes from OpenFOAM (no volume fraction,
+                       no refiment level, but pressure)
 
         """
         self.path = path
         self.center = center
         self.u_b = u_b
+        self.of=of
         self.read_field()
         self.create_triangulation()
 
     def read_field(self):
         """Read center values from disk."""
         try:
-            names = ['f', 'ref', 'u_x', 'u_y', 'u_z', 'x', 'y', 'z']
-            usecols = ['f', 'u_x', 'u_y', 'x', 'y']
+            if self.of:
+                names = ['u_x', 'u_y', 'u_z', 'p', 'x', 'y', 'z']
+                usecols = ['u_x', 'u_y', 'x', 'y']
+            else:
+                names = ['f', 'ref', 'u_x', 'u_y', 'u_z', 'x', 'y', 'z']
+                usecols = ['f', 'u_x', 'u_y', 'x', 'y']
             self.data = pd.read_csv(self.path, sep=',', header=0, names=names, usecols=usecols)
             print("Successfully read file \033[1m{}\033[0m".format(self.path))
         except Exception as read_exc:
