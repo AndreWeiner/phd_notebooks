@@ -7,3 +7,4 @@ notebooks/__pycache__
 .local
 .jupyter
 .cache
+*.tar.gz
