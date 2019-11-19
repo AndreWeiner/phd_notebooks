@@ -31,16 +31,16 @@ Further information may be found in [this](https://github.com/AndreWeiner/phd_no
 
 ## Getting the data
 
-The minimum required data to run the notebooks can be downloaded [here](https://tudatalib.ulb.tu-darmstadt.de/bitstream/handle/tudatalib/2087/basilisk_2D_symmetric_simulations_minimal.tar.gz?sequence=3&isAllowed=y). Move the downloaded tarball to the top-level folder of the repository such that the output of *ls* looks similar to
+The minimum required data to run the notebooks can be downloaded [here](https://tudatalib.ulb.tu-darmstadt.de/bitstream/handle/tudatalib/2121/phd_data_11_11_2019.tar.gz?sequence=1&isAllowed=y). Move the downloaded tarball to the top-level folder of the repository such that the output of *ls* looks similar to
 
 ```
 ~$ ls
-basilisk_2D_symmetric_simulations_minimal.tar.gz  data notebooks README.md ...
+phd_data_11_11_2019.tar.gz  notebooks README.md ...
 ```
 
-The extract the archive into the *data* folder, run:
+To extract the archive, run:
 ```
-tar xvzf basilisk_2D_symmetric_simulations_minimal.tar.gz --strip 1 -C data/
+tar xvzf phd_data_11_11_2019.tar.gz
 ```
 
 ## Running notebooks
@@ -75,3 +75,19 @@ docker build -t andreweiner/jupyter-environment:$(git log -1 --format=%h) .
 ```
 
 ## How to reference
+
+The Jupyter notebooks in this repository accompany the following publication, which will be published by spring 2020:
+
+```
+@electronic{weiner2020,
+  address = {Darmstadt},
+  author = {Weiner, Andre},
+  hdsurl = {xxx},
+  keywords = {xxx},
+  title = {Modeling and simulation of convection-dominated species transfer at rising bubbles},
+  uniqueid = {xxx},
+  url = {xxx},
+  year = 2020
+}
+
+```
