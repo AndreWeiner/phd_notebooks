@@ -4,8 +4,6 @@ This repository contains Jupyter notebooks related to the PhD thesis entitled
 
 > Modeling and simulation of convection-dominated species transfer at rising bubbles
 
-to be completed by the end of 2019. Note that this repository is **work in progress**.
-
 ## Dependencies
 
 The Jupyter notebooks may be executed using
