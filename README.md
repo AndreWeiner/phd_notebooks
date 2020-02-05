@@ -29,16 +29,16 @@ Further information may be found in [this](https://github.com/AndreWeiner/phd_no
 
 ## Getting the data
 
-The minimum required data to run the notebooks can be downloaded [here](https://tudatalib.ulb.tu-darmstadt.de/bitstream/handle/tudatalib/2121/phd_data_11_11_2019.tar.gz?sequence=1&isAllowed=y). Move the downloaded tarball to the top-level folder of the repository such that the output of *ls* looks similar to
+The full data set required to run the notebooks and to reproduce all temporary and final results can be downloaded [here](https://tudatalib.ulb.tu-darmstadt.de/bitstream/handle/tudatalib/2267/full_notebook_data_05_02_2020.tar.gz?sequence=1&isAllowed=y). Move the downloaded tar-ball to the top-level folder of the repository such that the output of *ls* looks similar to
 
 ```
 ~$ ls
-phd_data_11_11_2019.tar.gz  notebooks README.md ...
+full_notebook_data_05_02_2020.tar.gz  notebooks README.md ...
 ```
 
 To extract the archive, run:
 ```
-tar xvzf phd_data_11_11_2019.tar.gz
+tar xvzf full_notebook_data_05_02_2020.tar.gz
 ```
 
 ## Running notebooks
