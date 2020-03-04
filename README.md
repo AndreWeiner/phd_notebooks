@@ -86,5 +86,4 @@ The Jupyter notebooks in this repository accompany the following publication:
            month = {February},
             url = {http://tuprints.ulb.tu-darmstadt.de/11405/}
 }
-
 ```
