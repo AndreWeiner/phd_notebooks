@@ -10,9 +10,11 @@ This project was funded by the German Reseach Foundation (DFG) within the priori
 
 The Jupyter notebooks may be executed using
 - a local installation of all relevant Python packages or
-- the provided Docker image.
+- the provided Docker image (recommended).
 
 ### Docker
+
+Why should you bother using Docker and the (small) logistic overhead it creates? The provided Docker image contains a Jupyter and Python environment with all dependencies to run notebooks and scripts. This encapsulation of dependencies ensures that all results are reproducible independent of the underlaying host operating system and the software stack installed thereon. Also results containing some *random* component, e.g. the initialization of model weights, are to some extend reproducible. Such notebooks contain a *seed* for numpy and pyTorch in the first notebook cell. You will obtain the published results by running *Kernel -> Restart & Run All*. Repeatedly executing some of the cells will lead to varying results.
 
 Any installed version of [Docker](https://docs.docker.com/install/) larger than **1.10** will be able to pull and execute the Docker image hosted on [Dockerhub](https://hub.docker.com/r/andreweiner/jupyter-environment). There are convenience scripts to create and start a Docker container which require root privileges. To avoid running the scripts with *sudo*, follow the [post-installation steps](https://docs.docker.com/install/linux/linux-postinstall/).
 
