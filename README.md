@@ -44,6 +44,14 @@ To extract the archive, run:
 ```
 tar xvzf full_notebook_data_18_03_2020.tar.gz
 ```
+The archive contains raw data and intermediate results produced by some of the notebooks. The raw data was produced using Basilisk (two-phase volume-of-fluid simulations) and OpenFOAM (single phase flow dynamics and species transport). For more information, refer to the [Basilisk repository](https://github.com/AndreWeiner/phd_basilisk), the [OpenFOAM repository](https://github.com/AndreWeiner/phd_openfoam), and chapter 6.1 of my [thesis](https://tuprints.ulb.tu-darmstadt.de/cgi/users/home?screen=EPrint%3A%3AView&eprintid=11405). The general workflow to obtain a species transport solution may be outlined as follows:
+
+1. run a Basilisk volume-of-fluid simulation
+2. use the [process_plic_data.ipynb](https://github.com/AndreWeiner/phd_notebooks/blob/master/notebooks/process_plic_data.ipynb) to assemble and clean the Basilisk PLIC (piecewise linear interface calculation) data
+3. optional: use [process_logs.ipynb](https://github.com/AndreWeiner/phd_notebooks/blob/master/notebooks/process_logs.ipynb) if you ran your simulations on a cluster with multiple restarts; this script might have to be modified depending on your resources and batch system
+4. create the STL files to be used in OpenFOAM; for ellipsoidal and spherical cap bubbles have a look at [basilisk_2D_shape_approximation_simple.ipynb](https://github.com/AndreWeiner/phd_notebooks/blob/master/notebooks/basilisk_2D_shape_approximation_simple.ipynb); for dimpled ellipsoidal and skirted bubbles refer to [basilisk_2D_shape_approximation_complex.ipynb](https://github.com/AndreWeiner/phd_notebooks/blob/master/notebooks/basilisk_2D_shape_approximation_complex.ipynb)
+5. run single phase flow dynamics and species transport in OpenFOAM
+6. run Jupyter notebooks for post-processing
 
 ## Running notebooks
 
